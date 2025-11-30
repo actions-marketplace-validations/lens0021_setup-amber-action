@@ -30,7 +30,7 @@ jobs:
       - name: Test Amber compilation
         run: |
           echo 'echo "Hello from Amber!"' > test.ab
-          amber test.ab
+          amber build test.ab
           bash test.sh
 
   test-custom-version:
