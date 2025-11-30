@@ -18,14 +18,17 @@ runs:
   using: composite
   steps:
     - shell: bash
+      env:
+        INPUT_CACHE_PATH: ${{ inputs.cache-path }}
+        RUNNER_OS: ${{ runner.os }}
       run: |
         # Export cache path
-        if [ -n "${{ inputs.cache-path }}" ]; then
-          echo -n 'amber_cache_path=${{ inputs.cache-path }}' >> "$GITHUB_ENV"
-        elif [ "${{ runner.os }}" == "Linux" ]; then
-          echo -n 'amber_cache_path=/home/runner/.setup-amber' >> "$GITHUB_ENV"
+        if [ -n "$INPUT_CACHE_PATH" ]; then
+          echo "amber_cache_path=$INPUT_CACHE_PATH" >> "$GITHUB_ENV"
+        elif [ "$RUNNER_OS" == "Linux" ]; then
+          echo "amber_cache_path=/home/runner/.setup-amber" >> "$GITHUB_ENV"
         else
-          echo -n 'amber_cache_path=/Users/runner/.setup-amber' >> "$GITHUB_ENV"
+          echo "amber_cache_path=/Users/runner/.setup-amber" >> "$GITHUB_ENV"
         fi
     - name: Cache Amber binaries
       uses: actions/cache@v4
