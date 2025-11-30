@@ -22,14 +22,22 @@ runs:
         INPUT_CACHE_PATH: ${{ inputs.cache-path }}
         RUNNER_OS: ${{ runner.os }}
       run: |
-        # Export cache path
+        # Export cache path using delimiter syntax to prevent injection
+        delimiter="ghadelimiter_$(openssl rand -hex 16)"
+
         if [ -n "$INPUT_CACHE_PATH" ]; then
-          echo "amber_cache_path=$INPUT_CACHE_PATH" >> "$GITHUB_ENV"
+          cache_path="$INPUT_CACHE_PATH"
         elif [ "$RUNNER_OS" == "Linux" ]; then
-          echo "amber_cache_path=/home/runner/.setup-amber" >> "$GITHUB_ENV"
+          cache_path="/home/runner/.setup-amber"
         else
-          echo "amber_cache_path=/Users/runner/.setup-amber" >> "$GITHUB_ENV"
+          cache_path="/Users/runner/.setup-amber"
         fi
+
+        {
+          echo "amber_cache_path<<$delimiter"
+          echo "$cache_path"
+          echo "$delimiter"
+        } >> "$GITHUB_ENV"
     - name: Cache Amber binaries
       uses: actions/cache@v4
       if: inputs.enable-cache
