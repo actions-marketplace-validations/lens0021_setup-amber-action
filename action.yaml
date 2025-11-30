@@ -75,9 +75,9 @@ runs:
             return arch
           }
 
-          const cache_path = env_var_get("AMBER_CACHE_PATH")
+          const cache_path = trust env_var_get("AMBER_CACHE_PATH")
 
-          const ver = env_var_get("AMBER_VERSION")
+          const ver = trust env_var_get("AMBER_VERSION")
           const os = get_os()
           const arch = get_arch()
           let filename = "amber"
