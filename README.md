@@ -24,7 +24,7 @@ See [action.yaml](action.yaml)
   with:
     # The Amber version to install.
     # Examples: 0.4.0-alpha, 0.5.0-alpha
-    # Default: 0.4.0-alpha
+    # Default: 0.5.1-alpha
     amber-version: ""
 
     # Whether to cache Amber binaries
@@ -36,9 +36,17 @@ See [action.yaml](action.yaml)
     # Default (Linux): '/home/runner/.setup-amber'
     # Default (Mac): '/Users/runner/.setup-amber'
     cache-path: ""
+
+    # The path where the Amber binary should be installed.
+    # Default: /usr/local/bin/amber
+    bin-path: ""
 ```
 
 <!-- end usage -->
+
+### Outputs
+
+- `amber-path`: The path where the Amber binary was installed.
 
 ### Example workflow
 
@@ -71,6 +79,19 @@ jobs:
   with:
     amber-version: 0.4.0-alpha
     cache-path: /tmp/amber-cache
+```
+
+**Using outputs:**
+
+```yaml
+- name: Setup Amber
+  id: setup-amber
+  uses: lens0021/setup-amber@v2
+  with:
+    amber-version: 0.5.1-alpha
+
+- name: Display installed path
+  run: echo "Amber installed at ${{ steps.setup-amber.outputs.amber-path }}"
 ```
 
 ## License

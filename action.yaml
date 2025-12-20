@@ -13,45 +13,41 @@ inputs:
   cache-path:
     description: >-
       The path to directory where Amber binary caches are stored.
-      If empty string is given, the used path depends on the runner.
+      If empty string is given, defaults to ~/.tools on the runner.
     default: ""
   bin-path:
     description: >-
       The path to location where the final amber binary should be located.
       Default to `/usr/local/bin/amber`.
     default: /usr/local/bin/amber
+outputs:
+  amber-path:
+    description: The path where the Amber binary was installed.
+    value: ${{ steps.main.outputs.amber-path }}
 runs:
   using: composite
   steps:
     - shell: bash
       env:
         INPUT_CACHE_PATH: ${{ inputs.cache-path }}
-        RUNNER_OS: ${{ runner.os }}
+      id: cache-path
       run: |
-        # Export cache path
-        # using delimiter syntax to prevent injection
+        # Handle user-given cache-path
         delimiter="ghadelimiter_$(openssl rand -hex 16)"
-
-        if [ -n "$INPUT_CACHE_PATH" ]; then
-          cache_path="$INPUT_CACHE_PATH"
-        elif [ "$RUNNER_OS" == "Linux" ]; then
-          cache_path="/home/runner/.setup-amber"
-        else
-          cache_path="/Users/runner/.setup-amber"
-        fi
-
+        cache_path="${INPUT_CACHE_PATH:-$HOME/.tools}"
         {
           echo "amber_cache_path<<$delimiter"
           echo "$cache_path"
           echo "$delimiter"
-        } >> "$GITHUB_ENV"
+        } >> "$GITHUB_OUTPUT"
     - name: Cache Amber binaries
       uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
       if: inputs.enable-cache
       with:
-        path: ${{ env.amber_cache_path }}/bin
+        path: ${{ steps.cache-path.outputs.amber_cache_path }}/amber
         key: setup-amber-${{ runner.os }}-${{ runner.arch }}-${{ inputs.amber-version }}
-    - shell: bash
+    - id: main
+      shell: bash
       env:
         SETUP_AMBER_CACHE_PATH: ${{ env.amber_cache_path }}
         SETUP_AMBER_BIN_PATH: ${{ inputs.bin-path }}
