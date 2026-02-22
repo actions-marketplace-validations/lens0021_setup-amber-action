@@ -12,7 +12,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
@@ -33,7 +33,7 @@ jobs:
     name: Test with custom version
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
@@ -47,7 +47,7 @@ jobs:
     name: Test with cache disabled
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
@@ -62,7 +62,7 @@ jobs:
     name: Test with custom cache path
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
@@ -77,7 +77,7 @@ jobs:
     name: Test with custom cache path
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
@@ -88,11 +88,31 @@ jobs:
 
       - run: ./amber --version
 
+  test-repository-ref:
+    name: Test amber-repository-ref
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - uses: ./
+        with:
+          amber-repository-ref: 75a57027775f56b4044439346f2cd33df80645f9
+
+      - run: |
+          which amber
+          amber --version
+          amber --version | grep -q 75a5702
+          echo 'echo(trust ls("."))' > test.ab
+          amber build test.ab
+          bash test.sh
+
   test-output:
     name: Test amber-path output
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
@@ -101,13 +121,15 @@ jobs:
         with:
           amber-version: 0.5.1-alpha
 
-      - run: |
-          echo "Amber path output: ${{ steps.setup.outputs.amber-path }}"
-          if [ -z "${{ steps.setup.outputs.amber-path }}" ]; then
+      - env:
+          AMBER_PATH: ${{ steps.setup.outputs.amber-path }}
+        run: |
+          echo "Amber path output: $AMBER_PATH"
+          if [ -z "$AMBER_PATH" ]; then
             echo "Error: amber-path output is empty"
             exit 1
           fi
-          if [ ! -x "${{ steps.setup.outputs.amber-path }}" ]; then
+          if [ ! -x "$AMBER_PATH" ]; then
             echo "Error: amber-path does not point to an executable file"
             exit 1
           fi
